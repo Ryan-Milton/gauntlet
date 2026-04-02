@@ -10,16 +10,27 @@ export interface WaitOptions {
   interval?: number;
 }
 
+export interface RecordingOptions {
+  size?: { width: number; height: number };
+  fps?: number;          // default 30
+  outputDir?: string;    // defaults to ./recordings
+}
+
 export interface VisualCompareOptions {
-  threshold?: number;
-  maxDiffPixels?: number;
-  outputDir?: string;
+  threshold?: number;        // 0-1, default 0.1
+  updateBaseline?: boolean;  // if true, save as new baseline instead of comparing
+  baselineDir?: string;      // default ./visual-baselines
+  diffDir?: string;          // default ./visual-diffs
 }
 
 export interface VisualResult {
-  match: boolean;
+  passed: boolean;
   diffPixels: number;
-  diffPath?: string;
+  totalPixels: number;
+  diffPercentage: number;
+  diffImagePath?: string;    // path to diff PNG if failed
+  baselinePath: string;
+  actualPath: string;
 }
 
 export interface PlaywrightWebConfig {
@@ -28,6 +39,7 @@ export interface PlaywrightWebConfig {
   viewport?: { width: number; height: number };
   baseURL?: string;
   traceDir?: string;
+  recording?: RecordingOptions;
 }
 
 export interface PlaywrightElectronConfig {
@@ -35,6 +47,7 @@ export interface PlaywrightElectronConfig {
   args?: string[];
   env?: Record<string, string>;
   cwd?: string;
+  recording?: RecordingOptions;
 }
 
 export interface AppiumIOSConfig {

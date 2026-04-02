@@ -1,4 +1,4 @@
-import type { GauntletElement, MockResponse, RequestHandler, WaitOptions } from './types.js';
+import type { GauntletElement, MockResponse, RecordingOptions, RequestHandler, WaitOptions } from './types.js';
 
 export interface IDriver {
   launch(target: string): Promise<void>;
@@ -16,6 +16,10 @@ export interface IDriver {
   waitForAbsence(selector: string, options?: WaitOptions): Promise<void>;
   screenshot(name?: string): Promise<Buffer>;
   executeScript<T>(script: string, ...args: unknown[]): Promise<T>;
+
+  // Recording
+  startRecording(options?: RecordingOptions): Promise<void>;
+  stopRecording(outputPath?: string): Promise<string>;
 
   // Optional — web/electron only
   navigate?(url: string): Promise<void>;

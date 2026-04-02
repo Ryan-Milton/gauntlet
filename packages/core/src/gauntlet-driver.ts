@@ -1,9 +1,12 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import type {
   GauntletConfig,
   GauntletSelector,
   GauntletElement,
   Point,
   WaitOptions,
+  RecordingOptions,
   VisualCompareOptions,
   VisualResult,
   MockResponse,
@@ -188,14 +191,92 @@ export class GauntletDriver {
     return driver.reload();
   }
 
+  // Recording
+  async startRecording(options?: RecordingOptions): Promise<void> {
+    return this.getDriver().startRecording(options);
+  }
+
+  async stopRecording(outputPath?: string): Promise<string> {
+    return this.getDriver().stopRecording(outputPath);
+  }
+
   // Screenshots
   async screenshot(name?: string): Promise<Buffer> {
     return this.getDriver().screenshot(name);
   }
 
-  async compareScreenshot(_name: string, _options?: VisualCompareOptions): Promise<VisualResult> {
-    // Visual comparison is a placeholder — real implementation would use pixelmatch or similar
-    throw new Error('compareScreenshot() is not yet implemented');
+  async compareScreenshot(name: string, options?: VisualCompareOptions): Promise<VisualResult> {
+    const threshold = options?.threshold ?? 0.1;
+    const baselineDir = options?.baselineDir ?? './visual-baselines';
+    const diffDir = options?.diffDir ?? './visual-diffs';
+    const surface = this.config.surface;
+
+    const baselinePath = path.join(baselineDir, surface, `${name}.png`);
+    const actualDir = path.join(diffDir, surface);
+    const actualPath = path.join(actualDir, `${name}-actual.png`);
+
+    const actualBuffer = await this.getDriver().screenshot();
+
+    fs.mkdirSync(path.dirname(baselinePath), { recursive: true });
+    fs.mkdirSync(actualDir, { recursive: true });
+    fs.writeFileSync(actualPath, actualBuffer);
+
+    if (!fs.existsSync(baselinePath) || options?.updateBaseline) {
+      fs.writeFileSync(baselinePath, actualBuffer);
+      return {
+        passed: true,
+        diffPixels: 0,
+        totalPixels: 0,
+        diffPercentage: 0,
+        baselinePath,
+        actualPath,
+      };
+    }
+
+    const { default: pixelmatch } = await import('pixelmatch');
+    const { PNG } = await import('pngjs');
+
+    const img1 = PNG.sync.read(fs.readFileSync(baselinePath));
+    const img2 = PNG.sync.read(actualBuffer);
+
+    if (img1.width !== img2.width || img1.height !== img2.height) {
+      return {
+        passed: false,
+        diffPixels: -1,
+        totalPixels: img1.width * img1.height,
+        diffPercentage: 100,
+        baselinePath,
+        actualPath,
+      };
+    }
+
+    const diff = new PNG({ width: img1.width, height: img1.height });
+    const diffPixels = pixelmatch(
+      img1.data, img2.data, diff.data,
+      img1.width, img1.height,
+      { threshold }
+    );
+
+    const totalPixels = img1.width * img1.height;
+    const diffPercentage = (diffPixels / totalPixels) * 100;
+    const passed = diffPixels === 0 || diffPercentage < threshold * 100;
+
+    let diffImagePath: string | undefined;
+    if (!passed) {
+      diffImagePath = path.join(diffDir, surface, `${name}-diff.png`);
+      fs.mkdirSync(path.dirname(diffImagePath), { recursive: true });
+      fs.writeFileSync(diffImagePath, PNG.sync.write(diff));
+    }
+
+    return {
+      passed,
+      diffPixels,
+      totalPixels,
+      diffPercentage,
+      diffImagePath,
+      baselinePath,
+      actualPath,
+    };
   }
 
   // Network (web/electron)
