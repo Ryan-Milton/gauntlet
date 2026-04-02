@@ -6,6 +6,7 @@ export type {
   Surface,
   Point,
   WaitOptions,
+  RecordingOptions,
   VisualCompareOptions,
   VisualResult,
   PlaywrightWebConfig,

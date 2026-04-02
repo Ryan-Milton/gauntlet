@@ -10,16 +10,38 @@ export interface WaitOptions {
   interval?: number;
 }
 
+export interface RecordingOptions {
+  size?: { width: number; height: number };
+  fps?: number;          // default 30
+  outputDir?: string;    // defaults to ./recordings
+}
+
 export interface VisualCompareOptions {
+  /**
+   * Per-pixel color sensitivity for pixelmatch (0–1). Lower = stricter.
+   * Controls whether an individual pixel counts as "different". Default: 0.1
+   */
+  pixelmatchThreshold?: number;
+  /**
+   * Maximum acceptable diff as a percentage of total pixels (0–100).
+   * The test passes if diffPercentage is below this value. Default: 0.1
+   */
+  maxDiffPercent?: number;
+  /** @deprecated Use pixelmatchThreshold + maxDiffPercent instead. */
   threshold?: number;
-  maxDiffPixels?: number;
-  outputDir?: string;
+  updateBaseline?: boolean;  // if true, save as new baseline instead of comparing
+  baselineDir?: string;      // default ./visual-baselines
+  diffDir?: string;          // default ./visual-diffs
 }
 
 export interface VisualResult {
-  match: boolean;
+  passed: boolean;
   diffPixels: number;
-  diffPath?: string;
+  totalPixels: number;
+  diffPercentage: number;
+  diffImagePath?: string;    // path to diff PNG if failed
+  baselinePath: string;
+  actualPath: string;
 }
 
 export interface PlaywrightWebConfig {
@@ -28,6 +50,7 @@ export interface PlaywrightWebConfig {
   viewport?: { width: number; height: number };
   baseURL?: string;
   traceDir?: string;
+  recording?: RecordingOptions;
 }
 
 export interface PlaywrightElectronConfig {
@@ -35,6 +58,7 @@ export interface PlaywrightElectronConfig {
   args?: string[];
   env?: Record<string, string>;
   cwd?: string;
+  recording?: RecordingOptions;
 }
 
 export interface AppiumIOSConfig {

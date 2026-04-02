@@ -1,8 +1,11 @@
 import type { Browser, BrowserContext, Page, BrowserType } from 'playwright';
+import fs from 'node:fs';
+import path from 'node:path';
 import type {
   IDriver,
   GauntletElement,
   WaitOptions,
+  RecordingOptions,
   MockResponse,
   RequestHandler,
   PlaywrightWebConfig,
@@ -14,6 +17,7 @@ export class PlaywrightWebDriver implements IDriver {
   private context: BrowserContext | null = null;
   private page: Page | null = null;
   private readonly config: PlaywrightWebConfig;
+  private recording = false;
 
   /** Expose underlying Playwright page for escape hatch */
   get playwrightPage(): Page | null {
@@ -41,10 +45,20 @@ export class PlaywrightWebDriver implements IDriver {
     this.browser = await browserType.launch({
       headless: this.config.headless ?? true,
     });
-    this.context = await this.browser.newContext({
+    const contextOptions: Record<string, unknown> = {
       viewport: this.config.viewport,
       baseURL: this.config.baseURL,
-    });
+    };
+    if (this.config.recording) {
+      const recordDir = this.config.recording.outputDir ?? './recordings';
+      fs.mkdirSync(recordDir, { recursive: true });
+      contextOptions.recordVideo = {
+        dir: recordDir,
+        size: this.config.recording.size,
+      };
+      this.recording = true;
+    }
+    this.context = await this.browser.newContext(contextOptions);
     this.page = await this.context.newPage();
     if (this.config.traceDir) {
       await this.context.tracing.start({ screenshots: true, snapshots: true });
@@ -132,6 +146,35 @@ export class PlaywrightWebDriver implements IDriver {
       state: 'hidden',
       timeout: options?.timeout,
     });
+  }
+
+  async startRecording(_options?: RecordingOptions): Promise<void> {
+    if (this.recording) return;
+    if (!this.config.recording) {
+      throw new Error(
+        'Recording must be configured at launch time via PlaywrightWebConfig.recording. ' +
+        'Playwright requires video options at context creation.'
+      );
+    }
+    this.recording = true;
+  }
+
+  async stopRecording(outputPath?: string): Promise<string> {
+    if (!this.recording || !this.page) {
+      throw new Error('No recording in progress.');
+    }
+    const video = this.page.video();
+    if (!video) {
+      throw new Error('No video available. Ensure recording was configured at launch.');
+    }
+    this.recording = false;
+    if (outputPath) {
+      fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+      await video.saveAs(outputPath);
+      return outputPath;
+    }
+    const videoPath = await video.path();
+    return videoPath;
   }
 
   async screenshot(name?: string): Promise<Buffer> {

@@ -1,7 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import type {
   IDriver,
   GauntletElement,
   WaitOptions,
+  RecordingOptions,
   AppiumIOSConfig,
 } from '@gauntlet/core';
 import { AppiumElement } from './appium-element.js';
@@ -110,6 +113,23 @@ export class AppiumIOSDriver implements IDriver {
   async waitForAbsence(selector: string, options?: WaitOptions): Promise<void> {
     const el = await this.getBrowser().$(selector);
     await el.waitForDisplayed({ timeout: options?.timeout, reverse: true });
+  }
+
+  async startRecording(_options?: RecordingOptions): Promise<void> {
+    await this.getBrowser().execute('mobile: startRecordingScreen', {
+      videoType: 'mp4',
+      timeLimit: '600',
+      videoQuality: 'medium',
+    });
+  }
+
+  async stopRecording(outputPath?: string): Promise<string> {
+    const base64 = await this.getBrowser().execute('mobile: stopRecordingScreen') as string;
+    const buf = Buffer.from(base64, 'base64');
+    const outPath = outputPath || path.join('recordings', `ios-${Date.now()}.mp4`);
+    fs.mkdirSync(path.dirname(outPath), { recursive: true });
+    fs.writeFileSync(outPath, buf);
+    return outPath;
   }
 
   async screenshot(_name?: string): Promise<Buffer> {
