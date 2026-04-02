@@ -1,0 +1,21 @@
+{
+  "name": "@gauntlet/driver-ios",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "WebdriverIO + Appium XCUITest driver adapter for Gauntlet",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@gauntlet/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "webdriverio": "^8.0.0"
+  },
+  "devDependencies": {
+    "webdriverio": "^8.0.0",
+    "typescript": "~5.5.0"
+  }
+}

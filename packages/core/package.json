@@ -1,0 +1,29 @@
+{
+  "name": "@gauntlet/core",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Core GauntletDriver facade and shared types",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "playwright": "^1.40.0",
+    "webdriverio": "^8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "playwright": {
+      "optional": true
+    },
+    "webdriverio": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "~5.5.0",
+    "vitest": "^1.6.0"
+  }
+}

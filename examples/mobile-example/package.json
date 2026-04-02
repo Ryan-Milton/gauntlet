@@ -1,0 +1,19 @@
+{
+  "name": "@gauntlet/mobile-example",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Example mobile test using Gauntlet",
+  "scripts": {
+    "test:ios": "echo 'iOS tests require Appium + simulator — see tests/ios-login.test.ts'",
+    "test:android": "echo 'Android tests require Appium + emulator — see tests/android-login.test.ts'"
+  },
+  "dependencies": {
+    "@gauntlet/core": "workspace:*",
+    "@gauntlet/driver-ios": "workspace:*",
+    "@gauntlet/driver-android": "workspace:*"
+  },
+  "devDependencies": {
+    "webdriverio": "^8.0.0",
+    "typescript": "~5.5.0"
+  }
+}

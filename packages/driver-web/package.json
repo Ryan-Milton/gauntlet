@@ -1,0 +1,21 @@
+{
+  "name": "@gauntlet/driver-web",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Playwright web driver adapter for Gauntlet",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@gauntlet/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "playwright": ">=1.40.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.40.0",
+    "typescript": "~5.5.0"
+  }
+}

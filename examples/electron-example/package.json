@@ -1,0 +1,17 @@
+{
+  "name": "@gauntlet/electron-example",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Example Electron test using Gauntlet",
+  "scripts": {
+    "test": "echo 'Electron tests require an app binary — see tests/app.test.ts for usage'"
+  },
+  "dependencies": {
+    "@gauntlet/core": "workspace:*",
+    "@gauntlet/driver-electron": "workspace:*"
+  },
+  "devDependencies": {
+    "playwright": "^1.40.0",
+    "typescript": "~5.5.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@gauntlet/reporter",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Allure reporter integration for Gauntlet",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@gauntlet/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "allure-js-commons": "^2.0.0"
+  },
+  "devDependencies": {
+    "allure-js-commons": "^2.0.0",
+    "typescript": "~5.5.0"
+  }
+}
