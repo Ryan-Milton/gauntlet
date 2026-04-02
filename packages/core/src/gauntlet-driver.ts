@@ -206,7 +206,10 @@ export class GauntletDriver {
   }
 
   async compareScreenshot(name: string, options?: VisualCompareOptions): Promise<VisualResult> {
-    const threshold = options?.threshold ?? 0.1;
+    // Support legacy `threshold` field, but prefer the explicit split knobs.
+    const legacyThreshold = options?.threshold;
+    const pixelmatchThreshold = options?.pixelmatchThreshold ?? legacyThreshold ?? 0.1;
+    const maxDiffPercent = options?.maxDiffPercent ?? (legacyThreshold !== undefined ? legacyThreshold * 100 : 0.1);
     const baselineDir = options?.baselineDir ?? './visual-baselines';
     const diffDir = options?.diffDir ?? './visual-diffs';
     const surface = this.config.surface;
@@ -254,12 +257,12 @@ export class GauntletDriver {
     const diffPixels = pixelmatch(
       img1.data, img2.data, diff.data,
       img1.width, img1.height,
-      { threshold }
+      { threshold: pixelmatchThreshold }
     );
 
     const totalPixels = img1.width * img1.height;
     const diffPercentage = (diffPixels / totalPixels) * 100;
-    const passed = diffPixels === 0 || diffPercentage < threshold * 100;
+    const passed = diffPercentage <= maxDiffPercent;
 
     let diffImagePath: string | undefined;
     if (!passed) {

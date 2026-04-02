@@ -17,7 +17,18 @@ export interface RecordingOptions {
 }
 
 export interface VisualCompareOptions {
-  threshold?: number;        // 0-1, default 0.1
+  /**
+   * Per-pixel color sensitivity for pixelmatch (0–1). Lower = stricter.
+   * Controls whether an individual pixel counts as "different". Default: 0.1
+   */
+  pixelmatchThreshold?: number;
+  /**
+   * Maximum acceptable diff as a percentage of total pixels (0–100).
+   * The test passes if diffPercentage is below this value. Default: 0.1
+   */
+  maxDiffPercent?: number;
+  /** @deprecated Use pixelmatchThreshold + maxDiffPercent instead. */
+  threshold?: number;
   updateBaseline?: boolean;  // if true, save as new baseline instead of comparing
   baselineDir?: string;      // default ./visual-baselines
   diffDir?: string;          // default ./visual-diffs

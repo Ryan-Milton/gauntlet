@@ -167,13 +167,13 @@ export class PlaywrightWebDriver implements IDriver {
     if (!video) {
       throw new Error('No video available. Ensure recording was configured at launch.');
     }
+    this.recording = false;
     if (outputPath) {
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });
       await video.saveAs(outputPath);
       return outputPath;
     }
     const videoPath = await video.path();
-    this.recording = false;
     return videoPath;
   }
 

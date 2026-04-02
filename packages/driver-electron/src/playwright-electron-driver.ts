@@ -30,11 +30,22 @@ export class PlaywrightElectronDriver implements IDriver {
     const pw = await import('playwright');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const electron = (pw as any)._electron;
+    const contextOptions: Record<string, unknown> = {};
+    if (this.config.recording) {
+      const recordDir = this.config.recording.outputDir ?? './recordings';
+      fs.mkdirSync(recordDir, { recursive: true });
+      contextOptions.recordVideo = {
+        dir: recordDir,
+        size: this.config.recording.size,
+      };
+      this.recording = true;
+    }
     this.app = await electron.launch({
       executablePath: this.config.executablePath,
       args: this.config.args,
       env: this.config.env,
       cwd: this.config.cwd,
+      contextOptions,
     });
     this.page = await this.app!.firstWindow();
   }
@@ -133,13 +144,13 @@ export class PlaywrightElectronDriver implements IDriver {
     if (!video) {
       throw new Error('No video available. Ensure recording was configured at launch.');
     }
+    this.recording = false;
     if (outputPath) {
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });
       await video.saveAs(outputPath);
       return outputPath;
     }
     const videoPath = await video.path();
-    this.recording = false;
     return videoPath;
   }
 
